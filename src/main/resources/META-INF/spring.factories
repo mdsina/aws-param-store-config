@@ -1,0 +1,2 @@
+org.springframework.cloud.bootstrap.BootstrapConfiguration=\
+nl.trifork.aws.paramstore.AwsParamStoreBootstrapConfiguration
