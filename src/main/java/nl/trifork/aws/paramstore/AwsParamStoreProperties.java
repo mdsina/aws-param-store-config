@@ -31,6 +31,9 @@ public class AwsParamStoreProperties {
     /** Alternative to spring.application.name to use in looking up values in AWS Parameter Store. */
     private String name;
 
+    /** Is AWS Parameter Store support enabled. */
+    private boolean enabled = true;
+
     public String getPrefix() {
         return prefix;
     }
@@ -71,4 +74,11 @@ public class AwsParamStoreProperties {
         this.name = name;
     }
 
+    public boolean isEnabled() {
+        return enabled;
+    }
+
+    public void setEnabled(boolean enabled) {
+        this.enabled = enabled;
+    }
 }
