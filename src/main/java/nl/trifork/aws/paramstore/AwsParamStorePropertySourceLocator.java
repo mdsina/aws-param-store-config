@@ -15,6 +15,8 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
+import static nl.trifork.aws.paramstore.AwsParamStoreProperties.CONFIG_PREFIX;
+
 /**
  * Builds a {@link CompositePropertySource} with various {@link AwsParamStorePropertySource} instances based on
  * active profiles, application name and default context permutations. Mostly copied from Spring Cloud Consul's
@@ -55,21 +57,27 @@ public class AwsParamStorePropertySourceLocator implements PropertySourceLocator
 
         List<String> profiles = Arrays.asList(env.getActiveProfiles());
 
-        String prefix = this.properties.getPrefix();
+        String prefix = env.getProperty(CONFIG_PREFIX + ".prefix", properties.getPrefix());
+        this.properties.setPrefix(prefix);
 
-        String defaultContext = prefix + "/" + this.properties.getDefaultContext();
-        this.contexts.add(defaultContext + "/");
-        addProfiles(this.contexts, defaultContext, profiles);
+        String defaultPropContext = env.getProperty(CONFIG_PREFIX + ".defaultContext", properties.getDefaultContext());
+        this.properties.setDefaultContext(defaultPropContext);
 
-        String baseContext = prefix + "/" + appName;
-        this.contexts.add(baseContext + "/");
-        addProfiles(this.contexts, baseContext, profiles);
+        String defaultContext = prefix + "/" + defaultPropContext;
+        contexts.add(defaultContext + "/");
+        addProfiles(contexts, defaultContext, profiles);
 
-        Collections.reverse(this.contexts);
+        if (appName != null) {
+            String baseContext = prefix + "/" + appName;
+            contexts.add(baseContext + "/");
+            addProfiles(contexts, baseContext, profiles);
+        }
+
+        Collections.reverse(contexts);
 
         CompositePropertySource composite = new CompositePropertySource("aws-param-store");
 
-        for (String propertySourceContext : this.contexts) {
+        for (String propertySourceContext : contexts) {
             try {
                 composite.addPropertySource(create(propertySourceContext));
             } catch (Exception e) {
